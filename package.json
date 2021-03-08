@@ -1,0 +1,26 @@
+{
+  "name": "translify",
+  "version": "1.0.0",
+  "description": "Web Application for a freight forwarding Agency",
+  "main": "index.js",
+  "scripts": {
+    "client": "npm start --prefix client",
+    "server": "npm start --prefix backend",
+    "admin": "npm start --prefix admin",
+    "start": "concurrently \"yarn server\" \"yarn client\" \"yarn admin\" "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barakamulumia/translify.git"
+  },
+  "author": "barakamulumia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/barakamulumia/translify/issues"
+  },
+  "homepage": "https://github.com/barakamulumia/translify#readme",
+  "devDependencies": {
+    "concurrently": "^5.3.0"
+  },
+  "dependencies": {}
+}

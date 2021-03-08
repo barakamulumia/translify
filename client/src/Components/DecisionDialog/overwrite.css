@@ -1,0 +1,5 @@
+.MuiPaper-root.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.MuiPaper-elevation24.MuiPaper-rounded {
+  background-color: transparent !important;
+  transition: none;
+  box-shadow: none;
+}
