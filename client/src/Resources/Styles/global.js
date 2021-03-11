@@ -6,7 +6,7 @@ const GlobalStyle = createGlobalStyle`
 * {
   box-sizing: border-box;
   margin: 0;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Nunito Sans', sans-serif;
 }
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
