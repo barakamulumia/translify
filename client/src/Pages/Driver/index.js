@@ -12,7 +12,7 @@ import { Box } from "./driver.elements";
 
 import {
   Navbar,
-  XpressRegForm,
+  DriverRegistrationForm,
   Image,
   OrderDetails,
   Orders,
@@ -90,7 +90,7 @@ export default function Driver() {
                   alignContent="center"
                 >
                   <Grid item xs={12} sm={6} md={6}>
-                    <XpressRegForm USER_ID={user.userId} />
+                    <DriverRegistrationForm USER_ID={user.userId} />
                   </Grid>
 
                   <Grid item xs={12} sm={6} md={6}>
