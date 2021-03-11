@@ -10,7 +10,10 @@ const Driver = mongoose.model(
     },
     truckno: String,
     dlno: String,
-    address: String,
+    address: {
+      place_name: String,
+      place_id: String,
+    },
     dateOfReg: {
       type: Date,
       default: new Date(),
