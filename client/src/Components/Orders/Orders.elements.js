@@ -27,6 +27,15 @@ export const OrdersNav = styled(Paper)`
   display: flex;
   justify-content: space-between;
   background-color: rgba(0, 0, 0, 0.7) !important;
+
+  @media screen and (max-width: 1200px) {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media screen and (max-width: 960px) {
+    flex-wrap: nowrap;
+  }
 `;
 
 export const FilterButton = styled(Button)`
