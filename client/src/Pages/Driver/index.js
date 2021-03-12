@@ -94,7 +94,7 @@ export default function Driver() {
               ) : auth_state === 202 ? (
                 <p>Registration successful pending approval</p>
               ) : auth_state === 401 ? (
-                <p>We are Sorry thet your approval request has been declined</p>
+                <p>We are Sorry that your approval request has been declined</p>
               ) : (
                 <Grid
                   container
