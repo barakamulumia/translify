@@ -25,7 +25,7 @@ export default function Driver() {
   const [redirect, setRedirect] = useState(null);
   const [userReady, setUserReady] = useState(null);
   const [user, setUser] = useState(undefined);
-  const [isVerified, setIsVerified] = useState(false);
+  const [auth_state, setAuthState] = useState(null);
 
   const setActiveIndex = (id) => {
     dispatch(activeOrderChanged(id));
@@ -47,11 +47,20 @@ export default function Driver() {
             role,
           });
           setUserReady(true);
-          DriverAPI.checkVerification(userId).then((response) => {
-            if (response.status === 200) {
-              setIsVerified(true);
+          DriverAPI.check_approval(userId).then(
+            (response) => {
+              if (response.status >= 200 && response.status <= 210) {
+                setAuthState(response.data.auth_state);
+                console.log(response.data.auth_token);
+              }
+            },
+            (error) => {
+              const { status } = error.response;
+              if (status === 404) {
+                setAuthState(null);
+              }
             }
-          });
+          );
         } else {
           setUser(undefined);
         }
@@ -73,7 +82,7 @@ export default function Driver() {
           <Box container justify="space-between">
             <Container>
               <Navbar />
-              {isVerified ? (
+              {auth_state === 201 ? (
                 <Grid container spacing={8} justify="center">
                   <Grid item xs={12} sm={8} md={6}>
                     <Orders setActiveIndex={setActiveIndex} user={user} />
@@ -82,6 +91,10 @@ export default function Driver() {
                     {orders.length && <OrderDetails user={user} />}
                   </Grid>
                 </Grid>
+              ) : auth_state === 202 ? (
+                <p>Registration successful pending approval</p>
+              ) : auth_state === 401 ? (
+                <p>We are Sorry thet your approval request has been declined</p>
               ) : (
                 <Grid
                   container

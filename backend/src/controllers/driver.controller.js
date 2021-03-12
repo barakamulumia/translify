@@ -2,13 +2,7 @@ const db = require("../models");
 const User = db.user;
 const Driver = db.driver;
 
-/**
- * Submit additional details of a driver
- * @param {Object} req
- * @param {Object} res
- * @param {function} next
- */
-exports.complete_registration = (req, res, next) => {
+exports.completeRegistration = (req, res, next) => {
   const { userId, truckno, dlno, address } = req.body;
   const newDriver = new Driver({
     userId,
@@ -24,19 +18,13 @@ exports.complete_registration = (req, res, next) => {
       });
     }
     res.status(200).json({
-      message: "Registration Successfull Pending Approval",
+      message: "Driver Verified",
     });
     next();
   });
 };
 
-/**
- *check drivers approval status
- * @param {Object} req
- * @param {Object} res
- * @param {function} next
- */
-exports.check_approval = (req, res, next) => {
+exports.verifyRegistered = (req, res, next) => {
   const { userid: userId } = req.headers;
   Driver.findOne({ userId }, (err, driver) => {
     if (err) {
@@ -45,47 +33,18 @@ exports.check_approval = (req, res, next) => {
       });
       return;
     }
-
     if (!driver) {
       res.status(404).json({
-        auth_state: 404,
+        message: "user not found",
       });
       return;
     }
-
-    switch (driver.authourization.status) {
-      case "Declined":
-        res.status(200).json({
-          auth_state: 401,
-        });
-        break;
-      case "Pending":
-        res.status(200).json({
-          auth_state: 202,
-        });
-        break;
-      case "Approved":
-        res.status(201).json({
-          auth_state: 201,
-          auth_token: driver.authourization.token,
-        });
-        break;
-      default:
-        res.status(200).json({
-          status: 202,
-        });
-        break;
-    }
+    res.status(200).json({
+      id: driver._id,
+    });
     next();
   });
 };
-
-/**
- *get a single driver
- * @param {Object} req
- * @param {Object} res
- * @param {function} next
- */
 
 exports.getDriverById = (req, res, next) => {
   const { driverid: _id } = req.headers;
