@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const db = require("../../models");
 const User = db.user;
 const Role = db.role;
+const Driver = db.driver;
 
 module.exports = {
   create: (req, res) => {},
@@ -40,7 +41,7 @@ module.exports = {
               });
               return;
             }
-            res.set("content-range", drivers.length);
+            res.set("Content-Range", drivers.length);
             const response = drivers.map((driver) => {
               const {
                 rating,
@@ -50,16 +51,41 @@ module.exports = {
                 phoneno,
                 email,
               } = driver;
+
               return {
                 id,
                 firstname,
                 lastname,
                 phoneno,
                 email,
-                role: "driver",
                 rating,
               };
             });
+
+            Promise.all(
+              response.map((driver) =>
+                Driver.findOne({
+                  userId: driver.id,
+                })
+              )
+            ).then((driver) => {
+              const get_driver = (x) => x === String(driver[0].userId);
+              const truck_driver = response.find(
+                (d) => String(d.id) === String(driver[0].userId)
+              );
+              console.log(driver[0].authourization);
+
+              console.log({
+                id: truck_driver.id,
+                firstname: truck_driver.firstname,
+                lastname: truck_driver.lastname,
+                phoneno: truck_driver.phoneno,
+                email: truck_driver.email,
+                rating: truck_driver.rating,
+                auth: driver[0].authourization,
+              });
+            });
+
             res.status(200).json(response);
           }
         );
