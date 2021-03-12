@@ -6,7 +6,8 @@
   "scripts": {
     "client": "npm start --prefix client",
     "server": "npm start --prefix backend",
-    "start": "concurrently \"yarn server\" \"yarn client\" "
+    "admin": "npm start --prefix admin",
+    "start": "concurrently \"yarn server\" \"yarn client\" \"yarn admin\" "
   },
   "repository": {
     "type": "git",
