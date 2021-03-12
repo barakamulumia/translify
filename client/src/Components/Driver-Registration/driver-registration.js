@@ -25,7 +25,7 @@ import {
 } from "../Account/Account.elements";
 import { Label } from "./driver-registration.elements";
 
-export default function XpressRegister({ USER_ID }) {
+export default function DriverRegistration({ USER_ID }) {
   const [truckno, setTruckNo] = useState("");
   const [dlno, setDlNo] = useState("");
   const [place_name, setPlaceName] = useState("");
@@ -46,22 +46,14 @@ export default function XpressRegister({ USER_ID }) {
   const onSubmit = (e) => {
     e.preventDefault();
     // setLoading(true);
-    console.log({
-      truckno,
-      dlno,
-      address: {
-        place_name,
-        place_id,
-      },
-    });
-
-    DriverAPI.completeRegistration(USER_ID, truckno, dlno, {
+    DriverAPI.complete_registration(USER_ID, truckno, dlno, {
       place_name,
       place_id,
     }).then(
       (response) => {
         setMessage(response.data.message);
         setLoading(false);
+        window.location.reload(false);
       },
       (error) => {
         setMessage(
