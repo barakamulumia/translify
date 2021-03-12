@@ -2,7 +2,7 @@ const db = require("../models");
 const User = db.user;
 const Driver = db.driver;
 
-exports.completeRegistration = (req, res, next) => {
+exports.complete_registration = (req, res, next) => {
   const { userId, truckno, dlno, address } = req.body;
   const newDriver = new Driver({
     userId,
@@ -24,7 +24,7 @@ exports.completeRegistration = (req, res, next) => {
   });
 };
 
-exports.verifyRegistered = (req, res, next) => {
+exports.check_approval = (req, res, next) => {
   const { userid: userId } = req.headers;
   Driver.findOne({ userId }, (err, driver) => {
     if (err) {
