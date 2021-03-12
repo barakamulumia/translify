@@ -18,6 +18,17 @@ const Driver = mongoose.model(
       type: Date,
       default: new Date(),
     },
+    authourization: {
+      status: {
+        type: String,
+        enum: ["Pending", "Declined", "Approved"],
+        default: "Pending",
+      },
+      token: {
+        type: String,
+        default: "",
+      },
+    },
   })
 );
 
