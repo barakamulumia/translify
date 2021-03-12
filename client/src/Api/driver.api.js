@@ -12,7 +12,7 @@ class DriverAPI {
     });
   }
 
-  completeRegistration(userId, truckno, dlno, address) {
+  complete_registration(userId, truckno, dlno, address) {
     return axios.post(API_URL + "complete-registration", {
       userId,
       truckno,
@@ -21,7 +21,7 @@ class DriverAPI {
     });
   }
 
-  checkVerification(userid) {
+  check_approval(userid) {
     return axios.get(API_URL + "check-verification", {
       headers: {
         userid,
