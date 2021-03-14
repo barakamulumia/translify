@@ -13,163 +13,99 @@ module.exports = {
       password: userPassword,
     } = req.body;
 
-    Role.findOne(
-      {
-        name: "client",
-      },
-      (err, role) => {
-        if (err) {
-          res.status(500).json({ message: err });
-          return;
-        }
-        const user = new User({
-          firstname,
-          lastname,
-          phoneno,
-          email,
-          password: bcrypt.hashSync(userPassword, 10),
-          role: role._id,
-        });
+    const client_role = await Role.findOne({
+      name: "client",
+    });
 
-        user.save((err, user) => {
-          if (err) {
-            res.status(500).json({ message: err });
-            return;
-          }
-          res.status(200).json(user);
-        });
-      }
-    );
+    if (!client_role) {
+      res.status(404).json({
+        message: "Role not found",
+      });
+      return;
+    }
+
+    const user = await User.create({
+      firstname,
+      lastname,
+      phoneno,
+      email,
+      password: bcrypt.hashSync(userPassword, 10),
+      role: role._id,
+    });
+
+    const is_saved = await user.save();
+    if (!is_saved) {
+      res.status(500).json({ message: is_saved.errors });
+      return;
+    }
+    res.status(201).json(user);
   },
-  fetch: (req, res) => {
-    Role.findOne(
-      {
-        name: "client",
-      },
-      (err, role) => {
-        if (err) {
-          res.status(500).json({
-            message: err,
-          });
-          return;
-        }
-        if (!role) {
-          res.status(404).json({
-            message: "Role Not Found",
-          });
-          return;
-        }
-        User.find(
-          {
-            role: role._id,
-          },
-          (err, clients) => {
-            if (err) {
-              res.status(500).json({
-                message: err,
-              });
-              return;
-            }
-            if (!clients) {
-              res.status(404).json({
-                message: "Clients Not Found",
-              });
-              return;
-            }
-            res.set("content-range", clients.length);
-            const response = clients.map((client) => {
-              const {
-                rating,
-                _id: id,
-                firstname,
-                lastname,
-                phoneno,
-                email,
-              } = client;
-              return {
-                id,
-                firstname,
-                lastname,
-                phoneno,
-                email,
-                role: "client",
-                rating,
-              };
-            });
-            res.status(200).json(response);
-          }
-        );
-      }
-    );
+  fetch: async (req, res) => {
+    const client_role = await Role.findOne({
+      name: "client",
+    });
+
+    if (!client_role) {
+      res.status(404).json({
+        message: "Role Not Found",
+      });
+      return;
+    }
+
+    const users = await User.find({
+      role: client_role.id,
+    });
+
+    if (!users) {
+      res.status(404).json({
+        message: "Drivers Not Found",
+      });
+      return;
+    }
+
+    const clients = users.map((client) => {
+      const { rating, _id: id, firstname, lastname, phoneno, email } = client;
+      return {
+        id,
+        firstname,
+        lastname,
+        phoneno,
+        email,
+        rating,
+      };
+    });
+
+    res.set("content-range", clients.length);
+    res.status(200).json(clients);
   },
 
   get: async (req, res) => {
-    const clientId = req.params.id;
-    User.findOne(
-      {
-        _id: clientId,
-      },
-      (err, client) => {
-        if (err) {
-          res.status(500).json({
-            message: err,
-          });
-          return;
-        }
-        if (!client) {
-          res.status(404).json({
-            message: "Client Not Found",
-          });
-          return;
-        }
-        res.status(200).json(client);
-      }
-    );
-  },
-  update: async (req, res) => {
-    const clientId = req.params.id;
-    const updates = req.body;
-    User.findByIdAndUpdate(clientId, updates, (err, response) => {
-      if (err) {
-        res.status(500).json({
-          message: err,
-        });
-        return;
-      }
-      User.findById(clientId, (err, client) => {
-        if (err) {
-          res.status(500).json({
-            message: err,
-          });
-          return;
-        }
-        res.status(200).json({
-          data: { ...client, id: client._id },
-        });
-      });
+    const id = req.params.id;
+    const user = await User.findOne({
+      _id: id,
     });
+
+    if (!user) {
+      res.status(404).json({
+        message: "Client Not Found",
+      });
+      return;
+    }
+    res.status(200).json(user);
   },
   delete: async (req, res) => {
     const clientId = req.params.id;
-    User.findById(clientId, (err, client) => {
-      if (err) {
-        if (err) {
-          res.status(404).json({
-            message: err,
-          });
-          return;
-        }
-        if (!client) {
-          res.status(404).json({
-            message: "Client Not Found",
-          });
-          return;
-        }
-        User.findByIdAndDelete(clientId);
-        res.status(200).json({
-          data: { ...client, id: client._id },
-        });
-      }
+    const user = await User.findById(clientId);
+    if (!user) {
+      res.status(404).json({
+        message: "Client Not Found",
+      });
+      return;
+    }
+    const deleted_user = await User.findByIdAndDelete(clientId);
+
+    res.status(204).json({
+      data: { ...deleted_user, id: deleted_user._id },
     });
   },
 };
