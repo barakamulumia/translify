@@ -25,7 +25,7 @@ export default function Driver() {
   const [redirect, setRedirect] = useState(null);
   const [userReady, setUserReady] = useState(null);
   const [user, setUser] = useState(undefined);
-  const [auth_state, setAuthState] = useState(null);
+  const [approval_status, setApprovalStatus] = useState(null);
 
   const setActiveIndex = (id) => {
     dispatch(activeOrderChanged(id));
@@ -49,15 +49,12 @@ export default function Driver() {
           setUserReady(true);
           DriverAPI.check_approval(userId).then(
             (response) => {
-              if (response.status >= 200 && response.status <= 210) {
-                setAuthState(response.data.auth_state);
-                console.log(response.data.auth_token);
-              }
+              setApprovalStatus(response.data.approval_status);
             },
             (error) => {
               const { status } = error.response;
               if (status === 404) {
-                setAuthState(null);
+                setApprovalStatus(null);
               }
             }
           );
@@ -82,7 +79,7 @@ export default function Driver() {
           <Box container justify="space-between">
             <Container>
               <Navbar />
-              {auth_state === 201 ? (
+              {approval_status === "A" ? (
                 <Grid container spacing={8} justify="center">
                   <Grid item xs={12} sm={8} md={6}>
                     <Orders setActiveIndex={setActiveIndex} user={user} />
@@ -91,9 +88,9 @@ export default function Driver() {
                     {orders.length && <OrderDetails user={user} />}
                   </Grid>
                 </Grid>
-              ) : auth_state === 202 ? (
+              ) : approval_status === "P" ? (
                 <p>Registration successful pending approval</p>
-              ) : auth_state === 401 ? (
+              ) : approval_status === "D" ? (
                 <p>We are Sorry that your approval request has been declined</p>
               ) : (
                 <Grid
