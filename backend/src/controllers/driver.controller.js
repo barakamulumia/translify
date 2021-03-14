@@ -2,119 +2,85 @@ const db = require("../models");
 const User = db.user;
 const Driver = db.driver;
 
-exports.complete_registration = (req, res, next) => {
-  const { userId, truckno, dlno, address } = req.body;
-  const newDriver = new Driver({
-    userId,
-    truckno,
-    dlno,
-    address,
-  });
+module.exports = {
+  complete_registration: async (req, res, next) => {
+    const { userId, truckno, dlno, address } = req.body;
 
-  newDriver.save((err, driver) => {
-    if (err) {
-      res.status(500).json({
-        message: err,
-      });
-    }
-    res.status(200).json({
-      message: "Driver Verified",
+    const newDriver = await Driver.create({
+      userId,
+      truckno,
+      dlno,
+      address,
     });
-    next();
-  });
-};
 
-exports.check_approval = (req, res, next) => {
-  const { userid: userId } = req.headers;
-  Driver.findOne({ userId }, (err, driver) => {
-    if (err) {
+    const is_save = newDriver.save();
+    if (!is_save) {
       res.status(500).json({
-        message: err,
+        message: is_save.errors,
       });
-      return;
     }
+
+    res.status(200).json({
+      message: "Registartion successfull",
+    });
+
+    next();
+  },
+
+  check_approval: async (req, res) => {
+    const { userid: userId } = req.headers;
+
+    const driver = await Driver.findOne({
+      userId,
+    });
+
     if (!driver) {
       res.status(404).json({
-        message: "user not found",
+        message: "Driver not found",
       });
       return;
     }
+
+    res.status(200).json(driver);
+  },
+
+  get: async (req, res) => {
+    console.log(req.headers);
+
+    const id = req.headers.id;
+    const driver = await Driver.findById(id);
+
+    if (!driver) {
+      res.status(404).json({
+        message: "Driver Not Found",
+      });
+      return;
+    }
+
+    const user = await User.findOne({
+      userId: driver.userId,
+    });
+
+    if (!user) {
+      res.status(404).json({
+        message: "User Not Found",
+      });
+      return;
+    }
+
     res.status(200).json({
       id: driver._id,
+      userid: user._id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      phoneno: user.phoneno,
+      email: user.email,
+      rating: user.rating,
+      truckno: driver.truckno,
+      dlno: driver.dlno,
+      address: driver.address.place_name,
+      approval_status: format_approval(driver.approval_status),
+      created_at: new Date(driver.dateOfReg),
     });
-    next();
-  });
+  },
 };
-
-exports.getDriverById = (req, res, next) => {
-  const { driverid: _id } = req.headers;
-
-  Driver.findOne({ _id }, (err, driver) => {
-    if (err) {
-      res.status(500).json({
-        message: err,
-      });
-      return;
-    }
-
-    if (!driver) {
-      res.status(404).json({
-        message: "driver not found",
-      });
-      return;
-    }
-
-    User.findOne({ _id: driver.userId }, (err, user) => {
-      if (err) {
-        res.status(500).json({
-          message: err,
-        });
-        return;
-      }
-      if (!user) {
-        res.status(404).json({
-          message: "user not found",
-        });
-        return;
-      }
-
-      const { firstname, lastname } = user;
-      const { truckno, _id: driverId } = driver;
-
-      res.status(200).json({
-        firstname,
-        lastname,
-        driverId,
-        truckno,
-      });
-
-      next();
-    });
-  });
-};
-
-exports.getAllDrivers = (_req, res, next) => {
-  Driver.find({}, (err, drivers) => {
-    if (err) {
-      res.status(500).json({
-        message: err,
-      });
-      return;
-    }
-    if (!drivers) {
-      res.status(400).json({
-        message: "Drivers not found",
-      });
-      return;
-    }
-
-    res.status(200).json({
-      drivers,
-    });
-
-    next();
-  });
-};
-
-/**@todo */
-const getNearestDriver = (req, res, next) => {};
