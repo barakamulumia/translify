@@ -7,7 +7,5 @@ module.exports = function (app) {
 
   app.get("/api/clients/:id", controller.get);
 
-  app.put("/api/clients/:id", controller.update);
-
   app.delete("/api/clients/:id", controller.delete);
 };
