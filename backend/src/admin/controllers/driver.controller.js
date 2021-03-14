@@ -6,94 +6,107 @@ const Driver = db.driver;
 
 module.exports = {
   create: (req, res) => {},
-  fetch: (req, res) => {
-    Role.findOne(
-      {
-        name: "driver",
-      },
-      (err, role) => {
-        if (err) {
-          res.status(500).json({
-            message: err,
-          });
-          return;
-        }
-        if (!role) {
-          res.status(404).json({
-            message: "Role Not Found",
-          });
-          return;
-        }
-        User.find(
-          {
-            role: role._id,
-          },
-          (err, drivers) => {
-            if (err) {
-              res.status(500).json({
-                message: err,
-              });
-              return;
-            }
-            if (!drivers) {
-              res.status(404).json({
-                message: "Drivers Not Found",
-              });
-              return;
-            }
-            res.set("Content-Range", drivers.length);
-            const response = drivers.map((driver) => {
-              const {
-                rating,
-                _id: id,
-                firstname,
-                lastname,
-                phoneno,
-                email,
-              } = driver;
+  fetch: async (req, res) => {
+    const driver_role = await Role.findOne({
+      name: "driver",
+    });
 
-              return {
-                id,
-                firstname,
-                lastname,
-                phoneno,
-                email,
-                rating,
-              };
-            });
+    if (!driver_role) {
+      res.status(404).json({
+        message: "Role Not Found",
+      });
+      return;
+    }
 
-            Promise.all(
-              response.map((driver) =>
-                Driver.findOne({
-                  userId: driver.id,
-                })
-              )
-            ).then((driver) => {
-              const get_driver = (x) => x === String(driver[0].userId);
-              const truck_driver = response.find(
-                (d) => String(d.id) === String(driver[0].userId)
-              );
-              console.log(driver[0].authourization);
+    const users = await User.find({
+      role: driver_role.id,
+    });
 
-              console.log({
-                id: truck_driver.id,
-                firstname: truck_driver.firstname,
-                lastname: truck_driver.lastname,
-                phoneno: truck_driver.phoneno,
-                email: truck_driver.email,
-                rating: truck_driver.rating,
-                auth: driver[0].authourization,
-              });
-            });
-
-            res.status(200).json(response);
+    if (!users) {
+      res.status(404).json({
+        message: "Drivers Not Found",
+      });
+      return;
+    }
+    const drivers = await Promise.all(
+      users.map(async (user) => {
+        const exists = await Driver.findOne({
+          userId: user._id,
+        });
+        function format_approval(value) {
+          switch (value) {
+            case "A":
+              return "Approved";
+            case "D":
+              return "Declined";
+            case "P":
+            default:
+              return "Pending";
           }
-        );
-      }
+        }
+        if (exists) {
+          return {
+            id: exists._id,
+            userid: user._id,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            phoneno: user.phoneno,
+            email: user.email,
+            rating: user.rating,
+            truckno: exists.truckno,
+            dlno: exists.dlno,
+            address: exists.address.place_name,
+            approval_status: format_approval(exists.approval_status),
+            created_at: new Date(exists.dateOfReg),
+          };
+        }
+      })
     );
+    res.set("Content-Range", drivers.length);
+    res.status(200).json(drivers);
   },
 
-  get: (req, res) => {},
+  get: async (req, res) => {
+    const driver_id = req.params.id;
+
+    const driver = await Driver.findOne({
+      _id: driver_id,
+    });
+
+    if (!driver) {
+      res.status(404).json({
+        message: "Driver Not Found",
+      });
+      return;
+    }
+
+    const user = await User.findOne({
+      userId: driver.userId,
+    });
+
+    if (!user) {
+      res.status(404).json({
+        message: "User Not Found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      id: driver._id,
+      userid: user._id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      phoneno: user.phoneno,
+      email: user.email,
+      rating: user.rating,
+      truckno: driver.truckno,
+      dlno: driver.dlno,
+      address: driver.address.place_name,
+      approval_status: format_approval(driver.approval_status),
+      created_at: new Date(driver.dateOfReg),
+    });
+  },
   update: (req, res) => {},
+
   delete: (req, res) => {},
 };
