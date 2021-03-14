@@ -8,8 +8,17 @@ const Driver = mongoose.model(
       ref: "User",
       required: "UserId is required",
     },
+    oncall: {
+      type: Boolean,
+      default: false,
+    },
     truckno: String,
     dlno: String,
+    approval_status: {
+      type: String,
+      enum: ["P", "D", "A"],
+      default: "P",
+    },
     address: {
       place_name: String,
       place_id: String,
