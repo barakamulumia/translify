@@ -1,6 +1,6 @@
-import { Admin, Resource } from "react-admin";
+import { Admin, Resource, ShowGuesser } from "react-admin";
 import { ClientList, EditClient, CreateClient } from "./compnents/clients";
-import { DriverList } from "./compnents/drivers";
+import { DriverList, DriverShow } from "./compnents/drivers";
 import { dataProvider } from "./dataProvider";
 
 const App = () => (
@@ -11,7 +11,7 @@ const App = () => (
       edit={EditClient}
       create={CreateClient}
     />
-    <Resource name="drivers" list={DriverList} />
+    <Resource name="drivers" list={DriverList} show={ShowGuesser} />
   </Admin>
 );
 
