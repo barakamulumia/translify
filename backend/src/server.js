@@ -1,18 +1,17 @@
 const express = require("express"),
   bodyParser = require("body-parser"),
   cors = require("cors");
-const dbConfig = require("./config/db.config");
-const db = require("./models");
-const Role = db.role;
 
-const URI = `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`;
+const dbConfig = require("./config/db.config"),
+  db = require("./models");
 
-const app = express();
+const { initializeDB } = require("./utils/initializeDB");
 
-const corsOptions = {
-  origin: ["http://localhost:3000", "http://localhost:4000"],
-  "Access-Control-Expose-Headers": true,
-};
+const URI = `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`,
+  app = express(),
+  corsOptions = {
+    origin: ["http://localhost:3000", "http://localhost:4000"],
+  };
 
 app.use(cors(corsOptions));
 
@@ -40,10 +39,13 @@ db.mongoose
   })
   .then(() => {
     console.log("Successfully connected to MongoDb");
-    initializeDb();
+    initializeDB();
+  })
+  .then(() => {
+    console.log("DB initialized");
   })
   .catch((err) => {
-    console.err("Connection err", err);
+    console.error("Connection err", err);
     process.exit;
   });
 
@@ -63,36 +65,3 @@ app.get("/", (_req, res) => res.send("Hello World!"));
 const PORT = 8080;
 
 app.listen(PORT, () => console.log(` ${PORT}! is Live`));
-
-function initializeDb() {
-  Role.estimatedDocumentCount((err, count) => {
-    if (!err && count === 0) {
-      new Role({
-        name: "client",
-      }).save((err) => {
-        if (err) {
-          console.log("error", err);
-        }
-        console.log("Added 'client' to roles collection");
-      });
-
-      new Role({
-        name: "driver",
-      }).save((err) => {
-        if (err) {
-          console.log("error", err);
-        }
-        console.log("Added 'driver' to roles collection");
-      });
-
-      new Role({
-        name: "admin",
-      }).save((err) => {
-        if (err) {
-          console.log("error", err);
-        }
-        console.log("added 'admin' to roles collection");
-      });
-    }
-  });
-}
